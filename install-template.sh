@@ -328,6 +328,7 @@ valopt prefix "/usr/local" "set installation prefix"
 valopt libdir "${CFG_DESTDIR}${CFG_PREFIX}/lib" "install libraries"
 valopt mandir "${CFG_DESTDIR}${CFG_PREFIX}/share/man" "install man pages in PATH"
 opt ldconfig 1 "run ldconfig after installation (Linux only)"
+opt rewrite-paths 1 "enable rewriting install paths for libdir & mandir"
 
 if [ $HELP -eq 1 ]
 then
@@ -624,16 +625,18 @@ for component in $COMPONENTS; do
 	# Decide the destination of the file
 	FILE_INSTALL_PATH="${CFG_DESTDIR}${CFG_PREFIX}/$FILE"
 
-	if echo "$FILE" | grep "^lib/" > /dev/null
-	then
-            f=`echo $FILE | sed 's/^lib\///'`
-            FILE_INSTALL_PATH="${CFG_LIBDIR}/$f"
-	fi
+	if [ -z "${CFG_DISABLE_REWRITE_PATHS}" ]; then
+	    if echo "$FILE" | grep "^lib/" > /dev/null
+	    then
+		f=`echo $FILE | sed 's/^lib\///'`
+		FILE_INSTALL_PATH="${CFG_LIBDIR}/$f"
+	    fi
 
-	if echo "$FILE" | grep "^share/man/" > /dev/null
-	then
-            f=`echo $FILE | sed 's/^share\/man\///'`
-            FILE_INSTALL_PATH="${CFG_MANDIR}/$f"
+	    if echo "$FILE" | grep "^share/man/" > /dev/null
+	    then
+		f=`echo $FILE | sed 's/^share\/man\///'`
+		FILE_INSTALL_PATH="${CFG_MANDIR}/$f"
+	    fi
 	fi
 
 	# Make sure there's a directory for it
